@@ -6,7 +6,10 @@ class SharedPrefs{
   factory SharedPrefs() => SharedPrefs._internal();
   SharedPrefs._internal();
 
+
   Future<void> init() async {
     _sharedPrefs = await SharedPreferences.getInstance();
   }
+
+
 }

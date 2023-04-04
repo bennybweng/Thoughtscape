@@ -63,6 +63,15 @@ class _LockScreenState extends State<LockScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Icon(Icons.lock, size: 60, color: Colors.white,);
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Icon(Icons.lock, size: 60, color: Colors.white,),
+        SizedBox(
+          width: 150,
+            child: ElevatedButton(onPressed: (){_authenticate();}, child: Text("Unlock", style: TextStyle(fontSize: 17),),))
+      ],
+    );
   }
 }
