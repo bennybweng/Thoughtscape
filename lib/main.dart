@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:thoughtscape/pages/lock_screen.dart';
 import 'package:thoughtscape/shared/shared_prefs.dart';
 
-import 'pages/homepage.dart';
-
 Future<void> main() async{
-  SharedPrefs().init;
+  WidgetsFlutterBinding.ensureInitialized();
+  await SharedPrefs().init();
   runApp(const MyApp());
 }
 

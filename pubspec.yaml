@@ -37,6 +37,8 @@ dependencies:
   cupertino_icons: ^1.0.2
   local_auth: ^2.1.6
   shared_preferences: ^2.1.0
+  syncfusion_flutter_datepicker: ^21.1.38
+  intl: ^0.18.0
 
 dev_dependencies:
   flutter_test:
