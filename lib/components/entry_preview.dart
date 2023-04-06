@@ -6,8 +6,9 @@ import 'package:intl/intl.dart';
 class EntryPreview extends StatelessWidget {
 
   final Entry entry;
+  final Function reloadEntries;
 
-  const EntryPreview({Key? key, required this.entry}) : super(key: key);
+  const EntryPreview({Key? key, required this.entry, required this.reloadEntries}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -16,9 +17,10 @@ class EntryPreview extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       onTap: (){
-        Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayEntryPage(entry: entry,)));
+        Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayEntryPage(entry: entry,))).then((_) => reloadEntries());
       },
       child: Container(
+        width: MediaQuery.of(context).size.width - 16,
         decoration: BoxDecoration(
           border: Border.all(color: Theme.of(context).colorScheme.outline),
           borderRadius: BorderRadius.circular(10)

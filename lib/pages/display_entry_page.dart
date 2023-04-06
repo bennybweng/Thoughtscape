@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:thoughtscape/components/confirmation_dialog.dart';
+import 'package:thoughtscape/shared/shared_prefs.dart';
 
 import '../types/entry.dart';
 
@@ -21,7 +23,15 @@ class _DisplayEntryPageState extends State<DisplayEntryPage> {
     return Scaffold(
       appBar: AppBar(actions: [
         IconButton(onPressed: (){}, icon: const Icon(Icons.edit)),
-        IconButton(onPressed: (){}, icon: const Icon(Icons.delete)),
+        IconButton(onPressed: () async {
+          bool confirm = await _dialogBuilder(context) ?? false;
+          if(!mounted) return;
+          if (confirm) {
+            SharedPrefs().deleteEntry(widget.entry);
+            Navigator.pop(context);
+          }
+
+        }, icon: const Icon(Icons.delete)),
         IconButton(onPressed: (){}, icon: const Icon(Icons.share)),
       ],),
       body: ListView(
@@ -46,5 +56,11 @@ class _DisplayEntryPageState extends State<DisplayEntryPage> {
         ],
       ),
     );
+  }
+
+  Future<bool?> _dialogBuilder(BuildContext context){
+    return showDialog<bool>(context: context, builder: (BuildContext context){
+      return const ConfirmationDialog(message: "Möchten Sie diesen Eintrag wirklich löschen?");
+    });
   }
 }

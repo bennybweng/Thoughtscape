@@ -16,6 +16,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<Entry> entries = [];
+  bool _isDismissed = false;
 
   @override
   void initState() {
@@ -24,8 +25,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   void reloadEntries() {
-    entries = SharedPrefs().getEntries();
-    entries.sort((a,b) => b.date.compareTo(a.date));
+    setState(() {
+      entries = SharedPrefs().getEntries();
+      entries.sort((a, b) => b.date.compareTo(a.date));
+    });
     print(entries.length);
   }
 
@@ -37,10 +40,65 @@ class _HomePageState extends State<HomePage> {
         ),
         body: ListView(
           children: [
-            for(Entry entry in entries)
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: EntryPreview(entry: entry),
+            for (Entry entry in entries)
+              Dismissible(
+                onUpdate: (DismissUpdateDetails details) {
+                  if (details.reached) {
+                    setState(() {
+                      _isDismissed = true;
+                    });
+                  } else {
+                    setState(() {
+                      _isDismissed = false;
+                    });
+                  }
+                },
+                direction: DismissDirection.startToEnd,
+                background: Container(
+                  color: Colors.red,
+                  padding: const EdgeInsets.only(left: 15),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      AnimatedSwitcher(
+                        transitionBuilder:
+                            (Widget child, Animation<double> animation) {
+                          return ScaleTransition(
+                              scale: animation, child: child);
+                        },
+                        duration: const Duration(milliseconds: 300),
+                        child: !_isDismissed
+                            ? Icon(Icons.delete, key: Key("delete"),)
+                            : Icon(Icons.delete_forever, key: Key("delete_confirm")),
+                      ),
+                    ],
+                  ),
+                ),
+                key: Key(entry.title + entry.date.toIso8601String()),
+                onDismissed: (direction) {
+                  setState(() {
+                    _isDismissed = true;
+                    entries.remove(entry);
+                    SharedPrefs().deleteEntry(entry);
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text("${entry.title} gelöscht"),
+                      duration: const Duration(milliseconds: 1500),
+                      action: SnackBarAction(
+                          label: "Undo",
+                          onPressed: () => setState(() {
+                                SharedPrefs().saveEntry(entry);
+                                reloadEntries();
+                              })),
+                    ));
+                  });
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: EntryPreview(
+                    entry: entry,
+                    reloadEntries: reloadEntries,
+                  ),
+                ),
               )
           ],
         ),
@@ -54,11 +112,7 @@ class _HomePageState extends State<HomePage> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => const CreateEntryPage()),
-                      ).then((value) => {
-                            setState(() {
-                              reloadEntries();
-                            })
-                          });
+                      ).then((value) => reloadEntries());
                     },
                     child: const Icon(Icons.add)))),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,

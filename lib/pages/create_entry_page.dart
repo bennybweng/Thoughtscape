@@ -28,7 +28,7 @@ class _CreateEntryPageState extends State<CreateEntryPage> {
               if(SharedPrefs().saveEntry(Entry(date: date, title: title, text: text, mood: mood))){
                 Navigator.pop(context);
               }else{
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Entry with same date and title already exists")));
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Entry with same date and title already exists"), duration: Duration(milliseconds: 800),));
               }
             }, child: Text("Speichern")),
           )

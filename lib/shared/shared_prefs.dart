@@ -43,5 +43,9 @@ class SharedPrefs{
     return entries;
   }
 
+  void deleteEntry(Entry entry){
+    _sharedPrefs.remove(entryPrefix + entry.title + entry.date.toIso8601String());
+  }
+
 
 }
