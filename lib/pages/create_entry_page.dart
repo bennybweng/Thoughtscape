@@ -5,7 +5,10 @@ import 'package:thoughtscape/types/entry.dart';
 import '../shared/shared_prefs.dart';
 
 class CreateEntryPage extends StatefulWidget {
-  const CreateEntryPage({Key? key}) : super(key: key);
+
+  final Entry? entry;
+
+  const CreateEntryPage({Key? key, this.entry}) : super(key: key);
 
   @override
   State<CreateEntryPage> createState() => _CreateEntryPageState();
@@ -18,6 +21,14 @@ class _CreateEntryPageState extends State<CreateEntryPage> {
   Mood mood = Mood("neutral");
 
   @override
+  void initState() {
+    date = widget.entry == null ? DateUtils.dateOnly(DateTime.now()) : widget.entry!.date;
+    title = widget.entry == null ? "" : widget.entry!.title;
+    text = widget.entry == null ? "" : widget.entry!.text;
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -25,10 +36,18 @@ class _CreateEntryPageState extends State<CreateEntryPage> {
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: ElevatedButton(onPressed: () {
-              if(SharedPrefs().saveEntry(Entry(date: date, title: title, text: text, mood: mood))){
-                Navigator.pop(context);
-              }else{
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Entry with same date and title already exists"), duration: Duration(milliseconds: 800),));
+              if (widget.entry == null) {
+                if(SharedPrefs().saveEntry(Entry(date: date, title: title, text: text, mood: mood))){
+                  Navigator.pop(context);
+                }else{
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Entry with same date and title already exists"), duration: Duration(milliseconds: 800),));
+                }
+              }else {
+                if(SharedPrefs().editEntry(widget.entry!, Entry(date: date, title: title, text: text, mood: mood))){
+                  Navigator.pop(context, Entry(date: date, title: title, text: text, mood: mood));
+                }else{
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Entry with same date and title already exists"), duration: Duration(milliseconds: 800),));
+                }
               }
             }, child: Text("Speichern")),
           )
@@ -64,14 +83,16 @@ class _CreateEntryPageState extends State<CreateEntryPage> {
                 ),
               ),
             ),
-            TextField(
+            TextFormField(
+              initialValue: widget.entry == null ? "" : widget.entry!.title,
               onChanged: (String str) {
                 title = str;
               },
               decoration: const InputDecoration(
                   border: InputBorder.none, hintText: "Titel"),
             ),
-            TextField(
+            TextFormField(
+              initialValue: widget.entry == null ? "" : widget.entry!.text,
               keyboardType: TextInputType.multiline,
               maxLines: null,
               onChanged: (String str) {

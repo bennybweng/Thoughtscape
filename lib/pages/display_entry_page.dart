@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:thoughtscape/components/confirmation_dialog.dart';
+import 'package:thoughtscape/pages/create_entry_page.dart';
 import 'package:thoughtscape/shared/shared_prefs.dart';
 
 import '../types/entry.dart';
 
 class DisplayEntryPage extends StatefulWidget {
 
-  final Entry entry;
+  Entry entry;
 
-  const DisplayEntryPage({Key? key, required this.entry}) : super(key: key);
+  DisplayEntryPage({Key? key, required this.entry}) : super(key: key);
 
   @override
   State<DisplayEntryPage> createState() => _DisplayEntryPageState();
@@ -22,7 +23,9 @@ class _DisplayEntryPageState extends State<DisplayEntryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(actions: [
-        IconButton(onPressed: (){}, icon: const Icon(Icons.edit)),
+        IconButton(onPressed: (){
+          Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => CreateEntryPage(entry: widget.entry,))).then((value) => setState((){widget.entry = value ?? widget.entry;}));
+        }, icon: const Icon(Icons.edit)),
         IconButton(onPressed: () async {
           bool confirm = await _dialogBuilder(context) ?? false;
           if(!mounted) return;

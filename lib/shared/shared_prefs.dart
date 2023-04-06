@@ -31,6 +31,16 @@ class SharedPrefs{
     return true;
   }
 
+  bool editEntry(Entry oldEntry, Entry newEntry){
+    if (entryExists(newEntry)) {
+      return false;
+    }
+    deleteEntry(oldEntry);
+    String key = entryPrefix + newEntry.title + newEntry.date.toIso8601String();
+    _sharedPrefs.setString(key, jsonEncode(newEntry.toJson()));
+    return true;
+  }
+
   List<Entry> getEntries(){
     List<Entry> entries = [];
     for(String key in _sharedPrefs.getKeys().where((element) => element.startsWith(entryPrefix))){
