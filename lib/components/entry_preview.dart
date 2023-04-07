@@ -28,13 +28,25 @@ class EntryPreview extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 8, 0, 0),
-              child: RichText(text: TextSpan(style: TextStyle(color: Theme.of(context).colorScheme.primary),
-                  children: [
-                TextSpan(text: entry.date.day.toString().padLeft(2, "0"), style: const TextStyle(fontSize: 25, decoration: TextDecoration.underline)),
-                TextSpan(text: " ${DateFormat.MMM().format(entry.date)}.", style: const TextStyle(fontSize: 20))
-              ])),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 8, 0, 0),
+                  child: RichText(text: TextSpan(style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                      children: [
+                    TextSpan(text: entry.date.day.toString().padLeft(2, "0"), style: const TextStyle(fontSize: 25, decoration: TextDecoration.underline)),
+                    TextSpan(text: " ${DateFormat.MMM().format(entry.date)}.", style: const TextStyle(fontSize: 20))
+                  ])),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 8, 8, 0),
+                  child: SizedBox(
+                    height: 40,
+                      width: 40,
+                      child: entry.mood.toImage()),
+                )
+              ],
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(8, 5, 0, 0),

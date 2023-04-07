@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:thoughtscape/components/mood_dialog.dart';
 import 'package:thoughtscape/types/entry.dart';
 
 import '../shared/shared_prefs.dart';
@@ -25,6 +26,7 @@ class _CreateEntryPageState extends State<CreateEntryPage> {
     date = widget.entry == null ? DateUtils.dateOnly(DateTime.now()) : widget.entry!.date;
     title = widget.entry == null ? "" : widget.entry!.title;
     text = widget.entry == null ? "" : widget.entry!.text;
+    mood = widget.entry == null ? Mood("neutral") : widget.entry!.mood;
     super.initState();
   }
 
@@ -57,31 +59,42 @@ class _CreateEntryPageState extends State<CreateEntryPage> {
         padding: const EdgeInsets.only(left: 10),
         child: ListView(
           children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: InkWell(
-                onTap: () async {
-                  date = await showDatePicker(
-                          helpText: "",
-                          context: context,
-                          initialDate: date,
-                          firstDate: DateTime(DateTime.now().year - 100),
-                          lastDate: DateTime(2100)) ??
-                      date;
-                  setState(() {});
-                },
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 8, 8, 8),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                          "${date.day.toString().padLeft(2, "0")}. ${DateFormat.MMM().format(date)}. ${date.year}"),
-                      const Icon(Icons.arrow_drop_down)
-                    ],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                InkWell(
+                  onTap: () async {
+                    date = await showDatePicker(
+                            helpText: "",
+                            context: context,
+                            initialDate: date,
+                            firstDate: DateTime(DateTime.now().year - 100),
+                            lastDate: DateTime(DateTime.now().year + 100)) ??
+                        date;
+                    setState(() {});
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 8, 8, 8),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                            "${date.day.toString().padLeft(2, "0")}. ${DateFormat.MMM().format(date)}. ${date.year}"),
+                        const Icon(Icons.arrow_drop_down)
+                      ],
+                    ),
                   ),
                 ),
-              ),
+                SizedBox(
+                    height: 60,
+                    width: 60,
+                    child: IconButton(onPressed: () async {
+                      String newMood = await _dialogBuilder(context) ?? "neutral";
+                      setState(() {
+                        mood = Mood(newMood);
+                      });
+                    }, icon: mood.toImage()))
+              ],
             ),
             TextFormField(
               initialValue: widget.entry == null ? "" : widget.entry!.title,
@@ -106,5 +119,11 @@ class _CreateEntryPageState extends State<CreateEntryPage> {
         ),
       ),
     );
+  }
+
+  Future<String?> _dialogBuilder(BuildContext context){
+    return showDialog<String>(context: context, builder: (BuildContext context){
+      return const MoodDialog();
+    });
   }
 }

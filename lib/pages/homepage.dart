@@ -4,6 +4,7 @@ import 'package:thoughtscape/pages/calender_page.dart';
 import 'package:thoughtscape/pages/create_entry_page.dart';
 import 'package:thoughtscape/pages/profile_page.dart';
 
+import '../main.dart';
 import '../shared/shared_prefs.dart';
 import '../types/entry.dart';
 
@@ -14,9 +15,24 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
+const Color m3BaseColor = Color(0xff6750a4);
+const List<Color> colorOptions = [
+  m3BaseColor,
+  Colors.indigo,
+  Colors.blue,
+  Colors.teal,
+  Colors.green,
+  Colors.yellow,
+  Colors.orange,
+  Colors.deepOrange,
+  Colors.pink
+];
+
 class _HomePageState extends State<HomePage> {
   List<Entry> entries = [];
   bool _isDismissed = false;
+  String sort = "neuste zuerst";
+  Color selectedColor = colorOptions[SharedPrefs().getColor()];
 
   @override
   void initState() {
@@ -27,16 +43,89 @@ class _HomePageState extends State<HomePage> {
   void reloadEntries() {
     setState(() {
       entries = SharedPrefs().getEntries();
-      entries.sort((a, b) => b.date.compareTo(a.date));
+      if (sort == "älteste zuerst") {
+        entries.sort((a, b) => a.date.compareTo(b.date));
+      } else {
+        entries.sort((a, b) => b.date.compareTo(a.date));
+      }
     });
-    print(entries.length);
   }
+
+  final MaterialStateProperty<Icon?> thumbIcon =
+      MaterialStateProperty.resolveWith<Icon?>(
+    (Set<MaterialState> states) {
+      // Thumb icon when the switch is selected.
+      if (states.contains(MaterialState.selected)) {
+        return const Icon(Icons.dark_mode_outlined);
+      }
+      return const Icon(Icons.light_mode);
+    },
+  );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Homepage'),
+          actions: [
+            IconButton(onPressed: () {}, icon: Icon(Icons.search)),
+            PopupMenuButton<String>(
+                initialValue: sort,
+                onSelected: (String newSort) {
+                  setState(() {
+                    sort = newSort;
+                    reloadEntries();
+                  });
+                },
+                icon: const Icon(Icons.tune),
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                      const PopupMenuItem(
+                        value: "neuste zuerst",
+                        child: Text("neuste zuerst"),
+                      ),
+                      const PopupMenuDivider(
+                        height: 0,
+                      ),
+                      const PopupMenuItem(
+                        value: "älteste zuerst",
+                        child: Text("älteste zuerst"),
+                      ),
+                    ])
+          ],
+        ),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              const DrawerHeader(child: Text("Thoughtscape")),
+              ListTile(
+                leading: Icon(Icons.settings),
+                title: Text("Settings"),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.brightness_6_outlined),
+                title: Text("Brightness"),
+                trailing: Switch(
+                  thumbIcon: thumbIcon,
+                  value: Theme.of(context).brightness == Brightness.dark,
+                  onChanged: (bool value) {
+                    value == true
+                        ? MyApp.of(context).changeTheme(ThemeMode.dark)
+                        : MyApp.of(context).changeTheme(ThemeMode.light);
+                  },
+                ),
+              ),
+              ListTile(
+                leading: Icon(Icons.color_lens_outlined),
+                title: Text("Color"),
+                onTap: () {
+                  _colorDialogBuilder(context);
+                },
+              )
+            ],
+          ),
         ),
         body: ListView(
           children: [
@@ -68,8 +157,12 @@ class _HomePageState extends State<HomePage> {
                         },
                         duration: const Duration(milliseconds: 300),
                         child: !_isDismissed
-                            ? Icon(Icons.delete, key: Key("delete"),)
-                            : Icon(Icons.delete_forever, key: Key("delete_confirm")),
+                            ? Icon(
+                                Icons.delete,
+                                key: Key("delete"),
+                              )
+                            : Icon(Icons.delete_forever,
+                                key: Key("delete_confirm")),
                       ),
                     ],
                   ),
@@ -149,5 +242,33 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ));
+  }
+
+  Future<void> _colorDialogBuilder(BuildContext context) {
+    return showDialog<String>(
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
+            alignment: Alignment.bottomCenter,
+            insetPadding: EdgeInsets.fromLTRB(0, 0, 0, 50),
+            child: SizedBox(
+                height: 300,
+                width: 300,
+                child: GridView.count(
+                  crossAxisCount: 3,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: List.generate(
+                      9,
+                      (index) => Center(
+                          child: IconButton(
+                              onPressed: () {
+                                MyApp.of(context).changeColor(index);
+                                setState(() {
+                                  selectedColor = colorOptions[index];
+                                });
+                              }, icon: Icon(selectedColor == colorOptions[index] ? Icons.circle : Icons.circle_outlined, color: colorOptions[index],)))),
+                )),
+          );
+        });
   }
 }

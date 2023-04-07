@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../types/entry.dart';
@@ -32,7 +33,7 @@ class SharedPrefs{
   }
 
   bool editEntry(Entry oldEntry, Entry newEntry){
-    if (entryExists(newEntry)) {
+    if (entryExists(newEntry) && (oldEntry.title != newEntry.title || oldEntry.date != newEntry.date)) {
       return false;
     }
     deleteEntry(oldEntry);
@@ -57,5 +58,20 @@ class SharedPrefs{
     _sharedPrefs.remove(entryPrefix + entry.title + entry.date.toIso8601String());
   }
 
+  ThemeMode getBrightness(){
+    return _sharedPrefs.getBool("Brightness") == null ? ThemeMode.system : (_sharedPrefs.getBool("Brightness")! ? ThemeMode.light : ThemeMode.dark);
+  }
+
+  int getColor(){
+    return _sharedPrefs.getInt("Color") ?? 0;
+  }
+
+  void setBrightness(ThemeMode themeMode){
+    _sharedPrefs.setBool("Brightness", themeMode == ThemeMode.light ? true : false);
+  }
+
+  void setColor(int color){
+    _sharedPrefs.setInt("Color", color);
+  }
 
 }
