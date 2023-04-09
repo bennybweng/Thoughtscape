@@ -47,8 +47,8 @@ class _DisplayEntryPageState extends State<DisplayEntryPage> {
                 child: RichText(text: TextSpan(style: TextStyle(color: Theme.of(context).colorScheme.primary),
                     children: [
                       TextSpan(text: widget.entry.date.day.toString().padLeft(2, "0"), style: const TextStyle(fontSize: 35, decoration: TextDecoration.underline)),
-                      TextSpan(text: " ${DateFormat.MMM().format(widget.entry.date)}.", style: const TextStyle(fontSize: 30)),
-                      TextSpan(text: " ${DateFormat.y().format(widget.entry.date)}", style: const TextStyle(fontSize: 25))
+                      TextSpan(text: " ${DateFormat.MMM(Localizations.localeOf(context).toString()).format(widget.entry.date)}.", style: const TextStyle(fontSize: 30)),
+                      TextSpan(text: " ${DateFormat.y(Localizations.localeOf(context).toString()).format(widget.entry.date)}", style: const TextStyle(fontSize: 25))
                     ])),
               ),
               Padding(

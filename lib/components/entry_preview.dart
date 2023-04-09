@@ -36,7 +36,7 @@ class EntryPreview extends StatelessWidget {
                   child: RichText(text: TextSpan(style: TextStyle(color: Theme.of(context).colorScheme.primary),
                       children: [
                     TextSpan(text: entry.date.day.toString().padLeft(2, "0"), style: const TextStyle(fontSize: 25, decoration: TextDecoration.underline)),
-                    TextSpan(text: " ${DateFormat.MMM().format(entry.date)}.", style: const TextStyle(fontSize: 20))
+                    TextSpan(text: " ${DateFormat.MMM(Localizations.localeOf(context).toString()).format(entry.date)}.", style: const TextStyle(fontSize: 20))
                   ])),
                 ),
                 Padding(

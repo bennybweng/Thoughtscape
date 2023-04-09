@@ -34,6 +34,7 @@ class _HomePageState extends State<HomePage> {
   bool _isDismissed = false;
   String sort = "neuste zuerst";
   Color selectedColor = colorOptions[SharedPrefs().getColor()];
+  bool lock = SharedPrefs().getLock();
 
   @override
   void initState() {
@@ -52,7 +53,7 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  final MaterialStateProperty<Icon?> thumbIcon =
+  final MaterialStateProperty<Icon?> brightnessIcon =
       MaterialStateProperty.resolveWith<Icon?>(
     (Set<MaterialState> states) {
       // Thumb icon when the switch is selected.
@@ -60,6 +61,17 @@ class _HomePageState extends State<HomePage> {
         return const Icon(Icons.dark_mode_outlined);
       }
       return const Icon(Icons.light_mode);
+    },
+  );
+
+  final MaterialStateProperty<Icon?> lockIcon =
+  MaterialStateProperty.resolveWith<Icon?>(
+        (Set<MaterialState> states) {
+      // Thumb icon when the switch is selected.
+      if (states.contains(MaterialState.selected)) {
+        return const Icon(Icons.lock);
+      }
+      return const Icon(Icons.lock_open);
     },
   );
 
@@ -108,10 +120,23 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
               ListTile(
+                leading: Icon(Icons.lock),
+                title: Text("Lock"),
+                trailing: Switch(
+                  thumbIcon: lockIcon,
+                  onChanged: (bool value){
+                    setState(() {
+                      lock = value;
+                    });
+                    SharedPrefs().setLock(value);
+                  }, value: lock,
+                ),
+              ),
+              ListTile(
                 leading: Icon(Icons.brightness_6_outlined),
                 title: Text("Brightness"),
                 trailing: Switch(
-                  thumbIcon: thumbIcon,
+                  thumbIcon: brightnessIcon,
                   value: Theme.of(context).brightness == Brightness.dark,
                   onChanged: (bool value) {
                     value == true
@@ -195,7 +220,8 @@ class _HomePageState extends State<HomePage> {
                     reloadEntries: reloadEntries,
                   ),
                 ),
-              )
+              ),
+            SizedBox(height: 50,)
           ],
         ),
         floatingActionButton: SizedBox(
@@ -225,7 +251,7 @@ class _HomePageState extends State<HomePage> {
                       context,
                       MaterialPageRoute(
                           builder: (context) => const CalenderPage()),
-                    );
+                    ).then((_) => reloadEntries());
                   },
                   icon: Icon(Icons.calendar_month_outlined),
                   iconSize: 40,

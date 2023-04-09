@@ -74,4 +74,12 @@ class SharedPrefs{
     _sharedPrefs.setInt("Color", color);
   }
 
+  bool getLock(){
+    return _sharedPrefs.getBool("Lock") ?? false;
+  }
+
+  void setLock(bool value){
+    _sharedPrefs.setBool("Lock", value);
+  }
+
 }

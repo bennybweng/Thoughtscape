@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:thoughtscape/pages/homepage.dart';
 import 'package:thoughtscape/pages/lock_screen.dart';
 import 'package:thoughtscape/shared/shared_prefs.dart';
+
 
 Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,11 +44,16 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      //locale: Locale('de', 'DE'),
+      supportedLocales: [
+        Locale('en', 'US'),
+      //Locale('de', 'DE'),
+    ],
       title: 'Thoughtscape',
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: _themeMode,
-      home: const LockScreen(),
+      home: SharedPrefs().getLock() ? const LockScreen() : const HomePage(),
     );
   }
 

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:thoughtscape/components/entry_preview.dart';
 import 'package:thoughtscape/shared/shared_prefs.dart';
 import 'package:thoughtscape/types/entry.dart';
 
@@ -15,16 +18,24 @@ class _CalenderPageState extends State<CalenderPage> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-  late final List<Entry> entries;
+  late List<Entry> entries;
 
   @override
   void initState() {
+    initializeDateFormatting();
     entries = SharedPrefs().getEntries();
     _selectedDay = DateTime.now();
     _selectedEntries = ValueNotifier(_getEntries(_selectedDay!));
     super.initState();
   }
-
+  
+  void reloadEntries(){
+    setState(() {
+      entries = SharedPrefs().getEntries();
+      _selectedEntries.value = _getEntries(_selectedDay!);
+    });
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,16 +74,30 @@ class _CalenderPageState extends State<CalenderPage> {
             availableCalendarFormats: const {CalendarFormat.month: "Monat"},
             daysOfWeekHeight: 16 * MediaQuery.of(context).textScaleFactor,
             onDaySelected: (selectedDay, focusedDay) {
-              print(_selectedEntries.value.length);
               if (!isSameDay(_selectedDay, selectedDay)) {
                 setState(() {
                   _selectedDay = selectedDay;
                   _focusedDay = focusedDay;
                 });
+                _selectedEntries.value = _getEntries(selectedDay);
               }
             },
           ),
           const SizedBox(height: 8.0),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 0, 8),
+              child: RichText(
+                  text: TextSpan(children: [
+                TextSpan(text: DateFormat.EEEE("de").format(_selectedDay!), style: const TextStyle(fontSize: 25, decoration: TextDecoration.underline)),
+                TextSpan(
+                    text: " ${DateFormat.yMMMMd(
+                            "de")
+                        .format(_selectedDay!)}", style: const TextStyle(fontSize: 15))
+              ], style: TextStyle(color: Theme.of(context).colorScheme.primary))),
+            ),
+          ),
           Expanded(
             child: ValueListenableBuilder<List<Entry>>(
               valueListenable: _selectedEntries,
@@ -89,10 +114,7 @@ class _CalenderPageState extends State<CalenderPage> {
                         border: Border.all(),
                         borderRadius: BorderRadius.circular(12.0),
                       ),
-                      child: ListTile(
-                        onTap: () => print('a'),
-                        title: Text(value[index].text),
-                      ),
+                      child: EntryPreview(entry: value[index], reloadEntries: reloadEntries)
                     );
                   },
                 );
@@ -101,7 +123,6 @@ class _CalenderPageState extends State<CalenderPage> {
           ),
         ],
       ),
-
     );
   }
 
