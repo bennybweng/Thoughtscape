@@ -3,6 +3,7 @@ import 'package:thoughtscape/components/entry_preview.dart';
 import 'package:thoughtscape/pages/calender_page.dart';
 import 'package:thoughtscape/pages/create_entry_page.dart';
 import 'package:thoughtscape/pages/profile_page.dart';
+import 'package:thoughtscape/pages/search_page.dart';
 
 import '../main.dart';
 import '../shared/shared_prefs.dart';
@@ -67,7 +68,9 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
         appBar: AppBar(
           actions: [
-            IconButton(onPressed: () {}, icon: Icon(Icons.search)),
+            IconButton(onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => SearchPage(entries: entries,))).then((_) => reloadEntries());
+            }, icon: Icon(Icons.search)),
             PopupMenuButton<String>(
                 initialValue: sort,
                 onSelected: (String newSort) {
