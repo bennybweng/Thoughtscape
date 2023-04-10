@@ -65,8 +65,8 @@ class _HomePageState extends State<HomePage> {
   );
 
   final MaterialStateProperty<Icon?> lockIcon =
-  MaterialStateProperty.resolveWith<Icon?>(
-        (Set<MaterialState> states) {
+      MaterialStateProperty.resolveWith<Icon?>(
+    (Set<MaterialState> states) {
       // Thumb icon when the switch is selected.
       if (states.contains(MaterialState.selected)) {
         return const Icon(Icons.lock);
@@ -80,9 +80,16 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
         appBar: AppBar(
           actions: [
-            IconButton(onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => SearchPage(entries: entries,))).then((_) => reloadEntries());
-            }, icon: Icon(Icons.search)),
+            IconButton(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (BuildContext context) => SearchPage(
+                                entries: entries,
+                              ))).then((_) => reloadEntries());
+                },
+                icon: Icon(Icons.search)),
             PopupMenuButton<String>(
                 initialValue: sort,
                 onSelected: (String newSort) {
@@ -111,7 +118,18 @@ class _HomePageState extends State<HomePage> {
           child: ListView(
             padding: EdgeInsets.zero,
             children: [
-              const DrawerHeader(child: Text("Thoughtscape")),
+              const DrawerHeader(
+                padding: EdgeInsets.fromLTRB(16, 4, 16, 8),
+                decoration: BoxDecoration(
+                    image: DecorationImage(
+                        image: AssetImage("assets/header.png"),
+                        fit: BoxFit.cover)),
+                child: Text("Thoughtscape",
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 20,
+                        )),
+              ),
               ListTile(
                 leading: Icon(Icons.settings),
                 title: Text("Settings"),
@@ -124,12 +142,13 @@ class _HomePageState extends State<HomePage> {
                 title: Text("Lock"),
                 trailing: Switch(
                   thumbIcon: lockIcon,
-                  onChanged: (bool value){
+                  onChanged: (bool value) {
                     setState(() {
                       lock = value;
                     });
                     SharedPrefs().setLock(value);
-                  }, value: lock,
+                  },
+                  value: lock,
                 ),
               ),
               ListTile(
@@ -221,7 +240,9 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ),
-            SizedBox(height: 50,)
+            SizedBox(
+              height: 50,
+            )
           ],
         ),
         floatingActionButton: SizedBox(
@@ -295,7 +316,13 @@ class _HomePageState extends State<HomePage> {
                                 setState(() {
                                   selectedColor = colorOptions[index];
                                 });
-                              }, icon: Icon(selectedColor == colorOptions[index] ? Icons.circle : Icons.circle_outlined, color: colorOptions[index],)))),
+                              },
+                              icon: Icon(
+                                selectedColor == colorOptions[index]
+                                    ? Icons.circle
+                                    : Icons.circle_outlined,
+                                color: colorOptions[index],
+                              )))),
                 )),
           );
         });

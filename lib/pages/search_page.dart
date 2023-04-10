@@ -20,6 +20,7 @@ class _SearchPageState extends State<SearchPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         title: TextField(
           decoration: InputDecoration(
               hintText: "Suche in Tagebüchern",
@@ -33,19 +34,41 @@ class _SearchPageState extends State<SearchPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
-        child: ListView(
+        child: Column(
           children: [
-            for (Entry entry in widget.entries)
-              if (entry.text.toLowerCase().contains(searchWord.toLowerCase()) || entry.title.toLowerCase().contains(searchWord.toLowerCase()))
-                Padding(
+            Align(
+              alignment: Alignment.centerLeft,
+                child: Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: EntryPreview(entry: entry, reloadEntries: reloadEntries),
-                )
+                  child: Text("In ${numEntries()} Tagebüchern gefunden", style: TextStyle(color: Theme.of(context).colorScheme.primary),),
+                )),
+            Expanded(
+              child: ListView(
+                children: [
+                  for (Entry entry in widget.entries)
+                    if (entry.text.toLowerCase().contains(searchWord.toLowerCase()) || entry.title.toLowerCase().contains(searchWord.toLowerCase()))
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: EntryPreview(entry: entry, reloadEntries: reloadEntries),
+                      )
 
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  int numEntries(){
+    int number = 0;
+    for(Entry entry in widget.entries) {
+      if (entry.text.toLowerCase().contains(searchWord.toLowerCase()) || entry.title.toLowerCase().contains(searchWord.toLowerCase())) {
+        number ++;
+      }
+    }
+    return number;
   }
 
   void reloadEntries(){
