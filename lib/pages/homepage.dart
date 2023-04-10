@@ -170,7 +170,8 @@ class _HomePageState extends State<HomePage> {
                 onTap: () {
                   _colorDialogBuilder(context);
                 },
-              )
+              ),
+              const AboutListTile(icon: Icon(Icons.info), applicationName: "Thoughtscape", applicationVersion: "1.0", aboutBoxChildren: [Text("Thoughtscape is a digital diary app designed to help you capture and explore your inner thoughts and experiences.")],),
             ],
           ),
         ),
