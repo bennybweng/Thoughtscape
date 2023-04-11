@@ -21,13 +21,11 @@ class MoodDialog extends StatelessWidget {
                 moodButton("happy1", context),
                 moodButton("happy2", context),
                 moodButton("love", context),
-                moodButton("wink", context),
               ],
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                moodButton("sad1", context),
                 moodButton("angry", context),
                 moodButton("sad2", context),
                 moodButton("sad3", context),

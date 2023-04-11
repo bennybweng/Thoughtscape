@@ -17,6 +17,18 @@ class Entry {
     };
   }
 
+  /*bool equalEntry(Entry entry){
+    return date == entry.date && title == entry.title;
+  }*/
+
+  @override
+  bool operator ==(Object other){
+    if (other is Entry) {
+      return date == other.date && title == other.title;
+    }
+    return false;
+  }
+
   factory Entry.fromJson(Map<String, dynamic> json) {
     return Entry(
       date: DateTime.parse(json['creationDate'] ?? DateTime(2023).toIso8601String()),
@@ -25,6 +37,10 @@ class Entry {
       mood: Mood(json['mood'] ?? "neutral")
     );
   }
+
+  @override
+  int get hashCode => Object.hash(date, title);
+
 }
 
 class Mood{
@@ -41,14 +57,10 @@ class Mood{
         return Image.asset("assets/angry.png");
       case "love":
         return Image.asset("assets/love.png");
-      case "wink":
-        return Image.asset("assets/wink.png");
       case "happy1":
         return Image.asset("assets/happy1.png");
       case "happy2":
         return Image.asset("assets/happy2.png");
-      case "sad1":
-        return Image.asset("assets/sad1.png");
       case "sad2":
         return Image.asset("assets/sad2.png");
       case "sad3":
