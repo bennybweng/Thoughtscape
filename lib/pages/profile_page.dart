@@ -15,10 +15,8 @@ class _ProfilePageState extends State<ProfilePage> {
     "neutral",
     "angry",
     "love",
-    "wink",
     "happy1",
     "happy2",
-    "sad1",
     "sad2",
     "sad3",
     "sad4"
@@ -38,13 +36,56 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: AppBar(),
       body: ListView(
         children: [
+          statistics(context),
           diagramOne(context)
         ],
       ),
     );
   }
+
+  Widget statistics(BuildContext context){
+    TextStyle numStyle = const TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.secondaryContainer,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        width: MediaQuery.of(context).size.width,
+        height: 100,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(SharedPrefs().getEntries().length.toString(), style: numStyle,),
+                Text(SharedPrefs().getEntries().length == 1 ? "Eintrag" : "Einträge")
+              ],
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(numWords().toString(), style: numStyle,),
+                Text(numWords() == 1 ? "Wort" : "Wörter")
+              ],
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(numChar().toString(), style: numStyle,),
+                Text("Zeichen")
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
   
   Widget diagramOne(BuildContext context){
+    List<String> allMoods = existingMoods(days);
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SizedBox(
@@ -75,28 +116,28 @@ class _ProfilePageState extends State<ProfilePage> {
                     },
                   ),
                   sections: [
-                    for (String mood in existingMoods(days))
+                    for (String mood in allMoods)
                       PieChartSectionData(
                           badgePositionPercentageOffset: .98,
                           badgeWidget: AnimatedContainer(
                               width: touchedIndex ==
-                                  existingMoods(days).indexOf(mood)
+                                 allMoods.indexOf(mood)
                                   ? 50 + 20
                                   : 50,
                               height: touchedIndex ==
-                                  existingMoods(days).indexOf(mood)
+                                  allMoods.indexOf(mood)
                                   ? 50 + 20
                                   : 50,
                               duration: PieChart.defaultDuration,
                               child: Mood(mood).toImage()),
                           radius:
-                          touchedIndex == existingMoods(days).indexOf(mood)
+                          touchedIndex == allMoods.indexOf(mood)
                               ? radius + 10
                               : radius,
                           value: countMoods(days)[moods.indexOf(mood)].toDouble(),
                           titleStyle: TextStyle(
                             fontSize:
-                            touchedIndex == existingMoods(days).indexOf(mood)
+                            touchedIndex == allMoods.indexOf(mood)
                                 ? 20 + 5
                                 : 20,
                             fontWeight: FontWeight.bold,
@@ -224,5 +265,21 @@ class _ProfilePageState extends State<ProfilePage> {
       }
     }
     return existingMoods;
+  }
+
+  int numChar(){
+    int chars = 0;
+    for(Entry entry in SharedPrefs().getEntries()){
+      chars += entry.text.length;
+    }
+    return chars;
+  }
+
+  int numWords(){
+    int words = 0;
+    for(Entry entry in SharedPrefs().getEntries()){
+      words += entry.text.split(" ").where((element) => element.isNotEmpty && element != " ").toList().length;
+    }
+    return words;
   }
 }
