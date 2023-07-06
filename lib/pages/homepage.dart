@@ -1,9 +1,15 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:thoughtscape/components/entry_preview.dart';
 import 'package:thoughtscape/pages/calender_page.dart';
 import 'package:thoughtscape/pages/create_entry_page.dart';
 import 'package:thoughtscape/pages/profile_page.dart';
 import 'package:thoughtscape/pages/search_page.dart';
+import 'package:document_file_save_plus/document_file_save_plus.dart';
 
 import '../main.dart';
 import '../shared/shared_prefs.dart';
@@ -126,9 +132,9 @@ class _HomePageState extends State<HomePage> {
                         fit: BoxFit.cover)),
                 child: Text("Thoughtscape",
                     style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 20,
-                        )),
+                      color: Colors.black,
+                      fontSize: 20,
+                    )),
               ),
               ListTile(
                 leading: Icon(Icons.settings),
@@ -171,7 +177,71 @@ class _HomePageState extends State<HomePage> {
                   _colorDialogBuilder(context);
                 },
               ),
-              const AboutListTile(icon: Icon(Icons.info), applicationName: "Thoughtscape", applicationVersion: "1.0", aboutBoxChildren: [Text("Thoughtscape is a digital diary app designed to help you capture and explore your inner thoughts and experiences.")],),
+              ListTile(
+                leading: Icon(Icons.download),
+                title: Text("Download"),
+                onTap: () async {
+                  String output = "";
+                  for(Entry entry in entries){
+                    output += "${entry.date.toIso8601String()}\n";
+                    output += "${entry.title}\n";
+                    output += "${entry.text}\n";
+                    output += "${entry.mood.info}\n";
+                    output += "----- \n";
+                  }
+                  await DocumentFileSavePlus().saveFile(
+                      Uint8List.fromList(utf8.encode(output)),
+                      "entries.txt",
+                      "text/plain");
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(SnackBar(content: Text("Downloaded")));
+                  }
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.exit_to_app),
+                title: Text("Export"),
+                onTap: () async {
+                  Map<String, dynamic> output = {"entries" : [for(Entry entry in entries) entry.toJson()]};
+                  print(jsonEncode(output));
+                  await DocumentFileSavePlus().saveFile(
+                      Uint8List.fromList(utf8.encode(jsonEncode(output))),
+                      "entries_${DateTime.now().toIso8601String()}.json",
+                      "application/json");
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(SnackBar(content: Text("Downloaded")));
+                  }
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.ios_share),
+                title: Text("Import"),
+                onTap: () async {
+                  final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['json']);
+                  if (result == null) return;
+                  final file = File(result.files.first.path!);
+                  final contents = await file.readAsString();
+                  if (context.mounted) {
+                    print(contents);
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(SnackBar(content: Text("Downloaded")));
+                  }
+                },
+              ),
+              const AboutListTile(
+                icon: Icon(Icons.info),
+                applicationName: "Thoughtscape",
+                applicationVersion: "1.0",
+                aboutBoxChildren: [
+                  Text(
+                      "Thoughtscape is a digital diary app designed to help you capture and explore your inner thoughts and experiences.")
+                ],
+              ),
             ],
           ),
         ),
