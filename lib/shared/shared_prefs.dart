@@ -54,6 +54,12 @@ class SharedPrefs{
     return entries;
   }
 
+  void removeAllEntries(){
+    for(String key in _sharedPrefs.getKeys().where((element) => element.startsWith(entryPrefix))){
+      _sharedPrefs.remove(key);
+    }
+  }
+
   void deleteEntry(Entry entry){
     _sharedPrefs.remove(entryPrefix + entry.title + entry.date.toIso8601String());
   }

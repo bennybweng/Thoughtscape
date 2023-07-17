@@ -14,6 +14,7 @@ import 'package:document_file_save_plus/document_file_save_plus.dart';
 import '../main.dart';
 import '../shared/shared_prefs.dart';
 import '../types/entry.dart';
+import 'confirm_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -227,9 +228,30 @@ class _HomePageState extends State<HomePage> {
                   final contents = await file.readAsString();
                   if (context.mounted) {
                     print(contents);
+                    List<Entry> newEntries = [];
+                    final json = jsonDecode(contents);
+                    final entriesJson = json['entries'] ?? [];
+                    for (Map<String, dynamic> jsonEntry in entriesJson) {
+                      newEntries.add(Entry.fromJson(jsonEntry));
+                    }
                     Navigator.pop(context);
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text("Downloaded")));
+                    Navigator.push(context, MaterialPageRoute(
+                        builder: (BuildContext context) => ConfirmPage(
+                          entries: newEntries,
+                        ))).then((_) {
+                          if (_ ?? false == true) {
+                            SharedPrefs().removeAllEntries();
+                            for(Entry entry in newEntries){
+                              SharedPrefs().saveEntry(entry);
+                            }
+                            reloadEntries();
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(SnackBar(content: Text("Imported")));
+                          }else{
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(SnackBar(content: Text("Import cancelled")));
+                          }
+                    });
                   }
                 },
               ),
