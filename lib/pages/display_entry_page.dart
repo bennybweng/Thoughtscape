@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:thoughtscape/components/confirmation_dialog.dart';
 import 'package:thoughtscape/pages/create_entry_page.dart';
 import 'package:thoughtscape/shared/shared_prefs.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../types/entry.dart';
 
@@ -64,7 +65,16 @@ class _DisplayEntryPageState extends State<DisplayEntryPage> {
                   }
                 },
                 icon: const Icon(Icons.delete)),
-            IconButton(onPressed: () {}, icon: const Icon(Icons.share)),
+            IconButton(onPressed: () {
+              String output = "";
+              output += "----- \n";
+              output += "${widget.entry.date.day.toString().padLeft(2, "0")}-${widget.entry.date.month.toString().padLeft(2, "0")}-${widget.entry.date.year}\n\n";
+              output += "${widget.entry.title}\n\n";
+              output += "${widget.entry.text}\n\n";
+              output += "mood: ${widget.entry.mood.info}\n";
+              output += "----- \n";
+              Share.share(output);
+            }, icon: const Icon(Icons.reply, textDirection: TextDirection.rtl,)),
           ],
         ),
         body: PageView(
@@ -97,11 +107,11 @@ class _DisplayEntryPageState extends State<DisplayEntryPage> {
                                       decoration: TextDecoration.underline)),
                               TextSpan(
                                   text:
-                                      " ${DateFormat.MMM(Localizations.localeOf(context).toString()).format(entry.date)}.",
+                                      " ${intl.DateFormat.MMM(Localizations.localeOf(context).toString()).format(entry.date)}.",
                                   style: const TextStyle(fontSize: 30)),
                               TextSpan(
                                   text:
-                                      " ${DateFormat.y(Localizations.localeOf(context).toString()).format(entry.date)}",
+                                      " ${intl.DateFormat.y(Localizations.localeOf(context).toString()).format(entry.date)}",
                                   style: const TextStyle(fontSize: 25))
                             ])),
                       ),

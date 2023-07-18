@@ -4,12 +4,14 @@ import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:thoughtscape/components/entry_preview.dart';
 import 'package:thoughtscape/pages/calender_page.dart';
 import 'package:thoughtscape/pages/create_entry_page.dart';
 import 'package:thoughtscape/pages/profile_page.dart';
 import 'package:thoughtscape/pages/search_page.dart';
 import 'package:document_file_save_plus/document_file_save_plus.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../main.dart';
 import '../shared/shared_prefs.dart';
@@ -42,11 +44,13 @@ class _HomePageState extends State<HomePage> {
   String sort = "neuste zuerst";
   Color selectedColor = colorOptions[SharedPrefs().getColor()];
   bool lock = SharedPrefs().getLock();
+  String shareValue = "";
 
   @override
   void initState() {
     reloadEntries();
     super.initState();
+    shareValue = "txt";
   }
 
   void reloadEntries() {
@@ -81,6 +85,45 @@ class _HomePageState extends State<HomePage> {
       return const Icon(Icons.lock_open);
     },
   );
+
+  Future<String> get _localPath async {
+    final directory = await getTemporaryDirectory();
+    return directory.path;
+  }
+
+  Future<File> get _localJson async {
+    final path = await _localPath;
+    return File('$path/entries.json');
+  }
+
+  Future<File> get _localTxt async {
+    final path = await _localPath;
+    return File('$path/entries.txt');
+  }
+
+  Future<void> saveJson() async {
+    final file = await _localJson;
+    Map<String, dynamic> output = {
+      "entries": [for (Entry entry in entries) entry.toJson()]
+    };
+    await file.writeAsString(jsonEncode(output));
+    await Share.shareXFiles([XFile(file.path)]);
+  }
+
+  Future<void> saveTxt() async {
+    final file = await _localTxt;
+    String output = "";
+    for (Entry entry in entries) {
+      output +=
+          "${entry.date.day.toString().padLeft(2, "0")}-${entry.date.month.toString().padLeft(2, "0")}-${entry.date.year}\n\n";
+      output += "${entry.title}\n\n";
+      output += "${entry.text}\n\n";
+      output += "mood: ${entry.mood.info}\n";
+      output += "----- \n";
+    }
+    await file.writeAsString(jsonEncode(output));
+    await Share.shareXFiles([XFile(file.path)]);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -183,7 +226,7 @@ class _HomePageState extends State<HomePage> {
                 title: Text("Download"),
                 onTap: () async {
                   String output = "";
-                  for(Entry entry in entries){
+                  for (Entry entry in entries) {
                     output += "${entry.date.toIso8601String()}\n";
                     output += "${entry.title}\n";
                     output += "${entry.text}\n";
@@ -205,7 +248,9 @@ class _HomePageState extends State<HomePage> {
                 leading: Icon(Icons.exit_to_app),
                 title: Text("Export"),
                 onTap: () async {
-                  Map<String, dynamic> output = {"entries" : [for(Entry entry in entries) entry.toJson()]};
+                  Map<String, dynamic> output = {
+                    "entries": [for (Entry entry in entries) entry.toJson()]
+                  };
                   print(jsonEncode(output));
                   await DocumentFileSavePlus().saveFile(
                       Uint8List.fromList(utf8.encode(jsonEncode(output))),
@@ -222,7 +267,8 @@ class _HomePageState extends State<HomePage> {
                 leading: Icon(Icons.ios_share),
                 title: Text("Import"),
                 onTap: () async {
-                  final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['json']);
+                  final result = await FilePicker.platform.pickFiles(
+                      type: FileType.custom, allowedExtensions: ['json']);
                   if (result == null) return;
                   final file = File(result.files.first.path!);
                   final contents = await file.readAsString();
@@ -235,24 +281,97 @@ class _HomePageState extends State<HomePage> {
                       newEntries.add(Entry.fromJson(jsonEntry));
                     }
                     Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(
-                        builder: (BuildContext context) => ConfirmPage(
-                          entries: newEntries,
-                        ))).then((_) {
-                          if (_ ?? false == true) {
-                            SharedPrefs().removeAllEntries();
-                            for(Entry entry in newEntries){
-                              SharedPrefs().saveEntry(entry);
-                            }
-                            reloadEntries();
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(SnackBar(content: Text("Imported")));
-                          }else{
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(SnackBar(content: Text("Import cancelled")));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (BuildContext context) => ConfirmPage(
+                                  entries: newEntries,
+                                ))).then((_) async {
+                      if (_ ?? false == true) {
+                        Map<String, dynamic> output = {
+                          "entries": [
+                            for (Entry entry in entries) entry.toJson()
+                          ]
+                        };
+                        await DocumentFileSavePlus().saveFile(
+                            Uint8List.fromList(utf8.encode(jsonEncode(output))),
+                            "backup_${DateTime.now().toIso8601String()}.json",
+                            "application/json");
+                        if (context.mounted) {
+                          SharedPrefs().removeAllEntries();
+                          for (Entry entry in newEntries) {
+                            SharedPrefs().saveEntry(entry);
                           }
+                          reloadEntries();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("Imported")));
+                        }
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Import cancelled")));
+                      }
                     });
                   }
+                },
+              ),
+              ListTile(
+                leading: const Icon(
+                  Icons.reply,
+                  textDirection: TextDirection.rtl,
+                ),
+                title: const Text("Share"),
+                onTap: () {
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return StatefulBuilder(builder: (context, setState){
+                          return AlertDialog(
+                            title: Text("Share as"),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                RadioListTile(
+                                  title: Text(".txt"),
+                                    value: "txt",
+                                    groupValue: shareValue,
+                                    onChanged: (String? newValue) {
+                                      setState(() {
+                                        shareValue = newValue!;
+                                      });
+                                    }),
+                                RadioListTile(
+                                  title: Text(".json"),
+                                    value: "json",
+                                    groupValue: shareValue,
+                                    onChanged: (String? newValue) {
+                                      setState(() {
+                                        shareValue = newValue!;
+                                      });
+                                    })
+                              ],
+                            ),
+                            actions: [
+                              TextButton(
+                                child: Text('CANCEL'),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                              ),
+                              //Ok Button
+                              TextButton(
+                                child: Text('OK'),
+                                onPressed: () {
+                                  if (shareValue == "txt") {
+                                    saveTxt();
+                                  }else{
+                                    saveJson();
+                                  }
+                                },
+                              ),
+                            ],
+                          );
+                        });
+                      });
                 },
               ),
               const AboutListTile(
