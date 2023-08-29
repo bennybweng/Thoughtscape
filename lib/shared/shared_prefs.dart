@@ -72,6 +72,14 @@ class SharedPrefs{
     return _sharedPrefs.getInt("Color") ?? 0;
   }
 
+  String getStatisticsStyle(){
+    return _sharedPrefs.getString("StatisticsStyle") ?? "simple";
+  }
+
+  void setStatisticsStyle(String value){
+    _sharedPrefs.setString("StatisticsStyle", value);
+  }
+
   void setBrightness(ThemeMode themeMode){
     _sharedPrefs.setBool("Brightness", themeMode == ThemeMode.light ? true : false);
   }

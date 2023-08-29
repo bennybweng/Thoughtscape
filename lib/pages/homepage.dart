@@ -12,6 +12,7 @@ import 'package:thoughtscape/pages/profile_page.dart';
 import 'package:thoughtscape/pages/search_page.dart';
 import 'package:document_file_save_plus/document_file_save_plus.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:thoughtscape/pages/settings_page.dart';
 
 import '../main.dart';
 import '../shared/shared_prefs.dart';
@@ -185,6 +186,10 @@ class _HomePageState extends State<HomePage> {
                 title: Text("Settings"),
                 onTap: () {
                   Navigator.pop(context);
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (BuildContext context) => SettingsPage()));
                 },
               ),
               ListTile(
@@ -434,7 +439,7 @@ class _HomePageState extends State<HomePage> {
                     SharedPrefs().deleteEntry(entry);
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: Text("${entry.title} gelöscht"),
-                      duration: const Duration(milliseconds: 1500),
+                      duration: const Duration(milliseconds: 2500),
                       action: SnackBarAction(
                           label: "Undo",
                           onPressed: () => setState(() {
