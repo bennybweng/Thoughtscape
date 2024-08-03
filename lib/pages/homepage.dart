@@ -65,22 +65,22 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  final MaterialStateProperty<Icon?> brightnessIcon =
-      MaterialStateProperty.resolveWith<Icon?>(
-    (Set<MaterialState> states) {
+  final WidgetStateProperty<Icon?> brightnessIcon =
+      WidgetStateProperty.resolveWith<Icon?>(
+    (Set<WidgetState> states) {
       // Thumb icon when the switch is selected.
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return const Icon(Icons.dark_mode_outlined);
       }
       return const Icon(Icons.light_mode);
     },
   );
 
-  final MaterialStateProperty<Icon?> lockIcon =
-      MaterialStateProperty.resolveWith<Icon?>(
-    (Set<MaterialState> states) {
+  final WidgetStateProperty<Icon?> lockIcon =
+      WidgetStateProperty.resolveWith<Icon?>(
+    (Set<WidgetState> states) {
       // Thumb icon when the switch is selected.
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return const Icon(Icons.lock);
       }
       return const Icon(Icons.lock_open);
@@ -317,6 +317,17 @@ class _HomePageState extends State<HomePage> {
                       }
                     });
                   }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.cloud_upload),
+                title: const Text("Sync"),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (BuildContext context) => SettingsPage()));
                 },
               ),
               ListTile(
